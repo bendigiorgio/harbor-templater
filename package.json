@@ -6,7 +6,7 @@
   "bin": {
     "harbor-templater": "./bin/run.js"
   },
-  "bugs": "https://github.com/harbor-templater/harbor-templater/issues",
+  "bugs": "https://github.com/bendigiorgio/harbor-templater/issues",
   "dependencies": {
     "@inquirer/prompts": "^8.2.0",
     "@oclif/core": "^4",
@@ -53,7 +53,7 @@
     "./dist",
     "./oclif.manifest.json"
   ],
-  "homepage": "https://github.com/harbor-templater/harbor-templater",
+  "homepage": "https://github.com/bendigiorgio/harbor-templater",
   "keywords": [
     "oclif"
   ],
