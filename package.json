@@ -73,7 +73,7 @@
     ],
     "topicSeparator": " "
   },
-  "repository": "harbor-templater/harbor-templater",
+  "repository": "bendigiorgio/harbor-templater",
   "scripts": {
     "build": "shx rm -rf dist && shx rm -f tsconfig.tsbuildinfo && tsc -p tsconfig.json",
     "format": "biome format",
