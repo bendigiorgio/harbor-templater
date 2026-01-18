@@ -1,4 +1,5 @@
 {
+  "$schema": "../template.schema.json",
   "name": "Copy This Repo (Test)",
   "version": "0.1.0",
   "description": "Smoke-test template that copies files from the harbor-templater repo.",

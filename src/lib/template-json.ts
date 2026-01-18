@@ -1,4 +1,5 @@
 export type JSONTemplate = {
+  $schema?: string;
   author?: string;
   description?: string;
   name: string;

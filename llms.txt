@@ -28,6 +28,9 @@ Helpful flags:
 Authoritative spec (WIP):
 - `docs/template-json.md`
 
+Schema for editor IntelliSense (recommended):
+- `https://raw.githubusercontent.com/bendigiorgio/harbor-templater/main/docs/template.schema.json`
+
 Examples:
 - `docs/examples/minimal.template.json`
 - `docs/examples/copy-this-repo.template.json`
@@ -39,6 +42,10 @@ A template is JSON with top-level keys:
 - `version` (string; template schema version)
 - `questions` (optional array)
 - `steps` (required array; executed in order)
+
+Tip: add `$schema` at the top of your template for autocomplete/validation:
+
+`"$schema": "https://raw.githubusercontent.com/bendigiorgio/harbor-templater/main/docs/template.schema.json"`
 
 ### Context + interpolation
 

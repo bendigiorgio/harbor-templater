@@ -17,6 +17,7 @@ A template:
 
 ```ts
 type JSONTemplate = {
+  $schema?: string; // optional JSON Schema reference for editor hints
   name: string;
   version: string;
 
@@ -29,6 +30,39 @@ type JSONTemplate = {
   // Ordered list of actions to scaffold the project
   steps: TemplateStep[];
 };
+```
+
+## Editor IntelliSense (type hints)
+
+You can get autocomplete + validation for template JSON files by using a JSON Schema.
+
+This repo provides one at:
+
+- `docs/template.schema.json`
+
+Hosted (recommended for templates outside this repo):
+
+- `https://raw.githubusercontent.com/bendigiorgio/harbor-templater/main/docs/template.schema.json`
+
+Options:
+
+1. Add a `$schema` field to your template:
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/bendigiorgio/harbor-templater/main/docs/template.schema.json",
+  "name": "My Template",
+  "version": "0.1.0",
+  "steps": []
+}
+```
+
+1. If you’re working in this repo in VS Code, `.vscode/settings.json` maps `**/*.template.json` to the schema automatically.
+
+If you prefer a local schema file (offline use), you can also set:
+
+```json
+{ "$schema": "./template.schema.json" }
 ```
 
 ### `version`
