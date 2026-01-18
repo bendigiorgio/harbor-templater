@@ -1,0 +1,19 @@
+{
+  "name": "Test Template",
+  "version": "0.1.0",
+  "questions": [
+    {"id": "projectDir", "type": "input", "message": "Output directory?", "required": true}
+  ],
+  "steps": [
+    {"type": "copy", "source": "./test/commands/init/fixtures/base.json", "target": "{{answers.projectDir}}/package.json"},
+    {
+      "type": "merge",
+      "source": "./test/commands/init/fixtures/addon.json",
+      "target": "{{answers.projectDir}}/package.json",
+      "merge": {"format": "json", "strategy": "deep"}
+    },
+    {"type": "copy", "source": "./test/commands/init/fixtures/env.txt", "target": "{{answers.projectDir}}/.npmrc"},
+    {"type": "environment", "target": "{{answers.projectDir}}/.npmrc", "variables": {"NPM_TOKEN": "__NPM_TOKEN__"}},
+    {"type": "command", "command": "node -e \"require('fs').writeFileSync('ran.txt','ok')\"", "workingDirectory": "{{answers.projectDir}}"}
+  ]
+}
