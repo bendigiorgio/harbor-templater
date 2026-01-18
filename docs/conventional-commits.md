@@ -31,8 +31,10 @@ We use `husky` + `commitlint` to reject non-conforming commit messages.
 
 On every push to `main`, GitHub Actions runs semantic-release.
 
-Required GitHub repo secrets:
-
-- `NPM_TOKEN`: npm token with publish access
+Publishing to npm uses **npm trusted publishing** (OIDC), so you do **not** need a long-lived `NPM_TOKEN` secret.
 
 GitHub automatically provides `GITHUB_TOKEN` to create releases and push changelog/README commits.
+
+Optional secrets:
+
+- `NPM_READ_TOKEN`: read-only token (only needed if installing private npm dependencies in CI)

@@ -12,6 +12,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      id-token: write
     steps:
       - uses: actions/checkout@v5
         with:
@@ -22,6 +23,9 @@ jobs:
           node-version: 24
           cache: "pnpm"
           registry-url: https://registry.npmjs.org
+
+      - name: Ensure npm supports trusted publishing
+        run: npm i -g npm@^11.5.1
 
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -41,4 +45,3 @@ jobs:
         run: pnpm exec semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
