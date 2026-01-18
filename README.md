@@ -14,16 +14,14 @@ This CLI is being extended into a dynamic project scaffolder (Vite-style) driven
 [![Downloads/week](https://img.shields.io/npm/dw/harbor-templater.svg)](https://npmjs.org/package/harbor-templater)
 
 <!-- toc -->
-
-- [harbor-templater](#harbor-templater)
-- [Usage](#usage)
-- [Commands](#commands)
+* [harbor-templater](#harbor-templater)
+* [Usage](#usage)
+* [Commands](#commands)
 <!-- tocstop -->
 
 # Usage
 
 <!-- usage -->
-
 ```sh-session
 $ npm install -g harbor-templater
 $ harbor-templater COMMAND
@@ -35,25 +33,23 @@ USAGE
   $ harbor-templater COMMAND
 ...
 ```
-
 <!-- usagestop -->
 
 # Commands
 
 <!-- commands -->
-
-- [`harbor-templater help [COMMAND]`](#harbor-templater-help-command)
-- [`harbor-templater init`](#harbor-templater-init)
-- [`harbor-templater plugins`](#harbor-templater-plugins)
-- [`harbor-templater plugins add PLUGIN`](#harbor-templater-plugins-add-plugin)
-- [`harbor-templater plugins:inspect PLUGIN...`](#harbor-templater-pluginsinspect-plugin)
-- [`harbor-templater plugins install PLUGIN`](#harbor-templater-plugins-install-plugin)
-- [`harbor-templater plugins link PATH`](#harbor-templater-plugins-link-path)
-- [`harbor-templater plugins remove [PLUGIN]`](#harbor-templater-plugins-remove-plugin)
-- [`harbor-templater plugins reset`](#harbor-templater-plugins-reset)
-- [`harbor-templater plugins uninstall [PLUGIN]`](#harbor-templater-plugins-uninstall-plugin)
-- [`harbor-templater plugins unlink [PLUGIN]`](#harbor-templater-plugins-unlink-plugin)
-- [`harbor-templater plugins update`](#harbor-templater-plugins-update)
+* [`harbor-templater help [COMMAND]`](#harbor-templater-help-command)
+* [`harbor-templater init`](#harbor-templater-init)
+* [`harbor-templater plugins`](#harbor-templater-plugins)
+* [`harbor-templater plugins add PLUGIN`](#harbor-templater-plugins-add-plugin)
+* [`harbor-templater plugins:inspect PLUGIN...`](#harbor-templater-pluginsinspect-plugin)
+* [`harbor-templater plugins install PLUGIN`](#harbor-templater-plugins-install-plugin)
+* [`harbor-templater plugins link PATH`](#harbor-templater-plugins-link-path)
+* [`harbor-templater plugins remove [PLUGIN]`](#harbor-templater-plugins-remove-plugin)
+* [`harbor-templater plugins reset`](#harbor-templater-plugins-reset)
+* [`harbor-templater plugins uninstall [PLUGIN]`](#harbor-templater-plugins-uninstall-plugin)
+* [`harbor-templater plugins unlink [PLUGIN]`](#harbor-templater-plugins-unlink-plugin)
+* [`harbor-templater plugins update`](#harbor-templater-plugins-update)
 
 ## `harbor-templater help [COMMAND]`
 
@@ -395,5 +391,4 @@ DESCRIPTION
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.4.54/src/commands/plugins/update.ts)_
-
 <!-- commandsstop -->

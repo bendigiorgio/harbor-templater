@@ -1,8 +1,8 @@
 {
   "name": "harbor-templater",
-  "description": "A new CLI generated with oclif",
+  "description": "A CLI tool for scaffolding projects using Harbor templates",
   "version": "0.0.0",
-  "author": "Ben",
+  "author": "Ben Di Giorgio",
   "bin": {
     "harbor-templater": "./bin/run.js"
   },
