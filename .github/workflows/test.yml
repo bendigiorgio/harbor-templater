@@ -1,7 +1,7 @@
 name: tests
 on:
   push:
-    branches-ignore: [main]
+    branches: ['**']
   workflow_dispatch:
 
 jobs:
@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest", "windows-latest"]
-        node_version: [lts/-1, lts/*, latest]
+        node_version: [18, 20, 22]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -17,9 +17,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node_version }}
-          cache: pnpm
       - name: Enable pnpm
         run: corepack enable
+      - name: Verify pnpm
+        run: pnpm --version
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
       - run: pnpm run test
