@@ -1,0 +1,43 @@
+{
+  "title": "harbor-templater",
+  "language": "en",
+  "summary": "A dynamic project scaffolding CLI (Vite-style) driven by JSON templates.",
+  "gettingStarted": {
+    "install": "npm install -g harbor-templater",
+    "run": "harbor-templater init --template <path-or-url> --out <dir>",
+    "examples": [
+      "harbor-templater init --template ./docs/examples/minimal.template.json --out .",
+      "harbor-templater init --template ./template.json --out . --answer projectDir=./my-app --defaults",
+      "harbor-templater init --template ./template.json --out . --dryRun"
+    ]
+  },
+  "commands": {
+    "init": {
+      "description": "Scaffold a project from a JSON template.",
+      "flags": {
+        "--template (-t)": "Path or URL to a template JSON file (required).",
+        "--out (-o)": "Base output directory (default: .).",
+        "--answer": "Provide an answer: --answer key=value (repeatable).",
+        "--defaults": "Do not prompt; use defaults and provided answers.",
+        "--dryRun": "Print actions without writing files or running commands.",
+        "--conflict": "When targets exist: error|skip|overwrite|prompt (default: prompt; becomes error under --defaults).",
+        "--force": "Overwrite existing files when copying.",
+        "--allowMissingEnv": "Do not fail if an env var is missing for an environment step."
+      }
+    }
+  },
+  "templateSpec": {
+    "path": "./docs/template-json.md",
+    "highlights": [
+      "questions (input/confirm/select/multiselect)",
+      "conditional execution with when",
+      "steps: copy, merge, environment, command",
+      "interpolation: {{answers.someId}}"
+    ]
+  },
+  "notes": [
+    "Remote sources are supported via http(s) URLs and github:owner/repo#ref:path.",
+    "Merge currently supports JSON (deep/shallow) and text (append/prepend).",
+    "YAML merge is planned but not implemented yet."
+  ]
+}

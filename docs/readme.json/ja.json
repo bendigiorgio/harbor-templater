@@ -1,0 +1,43 @@
+{
+  "title": "harbor-templater",
+  "language": "ja",
+  "summary": "JSONテンプレートを使ってプロジェクトを動的に生成するCLI（Vite風のスキャフォールディング）。",
+  "gettingStarted": {
+    "install": "npm install -g harbor-templater",
+    "run": "harbor-templater init --template <path-or-url> --out <dir>",
+    "examples": [
+      "harbor-templater init --template ./docs/examples/minimal.template.json --out .",
+      "harbor-templater init --template ./template.json --out . --answer projectDir=./my-app --defaults",
+      "harbor-templater init --template ./template.json --out . --dryRun"
+    ]
+  },
+  "commands": {
+    "init": {
+      "description": "JSONテンプレートからプロジェクトを生成します。",
+      "flags": {
+        "--template (-t)": "テンプレートJSONへのパスまたはURL（必須）。",
+        "--out (-o)": "出力の基準ディレクトリ（デフォルト: .）。",
+        "--answer": "回答を指定: --answer key=value（複数回指定可）。",
+        "--defaults": "対話せず、default値と指定済み回答で実行します。",
+        "--dryRun": "ファイル書き込み/コマンド実行をせず、実行内容だけ表示します。",
+        "--conflict": "出力先が存在する場合: error|skip|overwrite|prompt（デフォルト: prompt。--defaults時はprompt不可のためerror扱い）。",
+        "--force": "copy時に既存ファイルを上書きします。",
+        "--allowMissingEnv": "environment stepで環境変数が未設定でも失敗しません。"
+      }
+    }
+  },
+  "templateSpec": {
+    "path": "./docs/template-json.md",
+    "highlights": [
+      "questions（input/confirm/select/multiselect）",
+      "when による条件分岐",
+      "steps: copy / merge / environment / command",
+      "埋め込み: {{answers.someId}}"
+    ]
+  },
+  "notes": [
+    "Remote sourceは http(s) URL と github:owner/repo#ref:path をサポートします。",
+    "mergeは現状 JSON（deep/shallow）と text（append/prepend）に対応しています。",
+    "YAML mergeは今後対応予定（未実装）。"
+  ]
+}
