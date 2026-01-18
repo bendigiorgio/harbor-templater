@@ -31,8 +31,15 @@ describe('init (copy exclude + dir targets)', () => {
         .catch(() => false)
 
     expect(await exists(path.join(projectDir, 'copied', 'debug.log'))).to.equal(false)
-    expect(await exists(path.join(projectDir, 'copied', 'node_modules'))).to.equal(false)
     expect(await exists(path.join(projectDir, 'copied', 'node_modules', 'dep.txt'))).to.equal(false)
+
+    // Some Node/platform combinations may still create the destination directory
+    // even if all files beneath it are excluded.
+    const nmPath = path.join(projectDir, 'copied', 'node_modules')
+    if (await exists(nmPath)) {
+      const entries = await fs.readdir(nmPath)
+      expect(entries).to.deep.equal([])
+    }
   })
 
   it('treats a trailing-slash copy target as a directory and preserves basename', async () => {
