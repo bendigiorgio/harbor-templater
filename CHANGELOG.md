@@ -1,3 +1,9 @@
+## 1.1.0 (2026-01-18)
+
+* feat: add JSON schema support for templates and enhance documentation ([eeb4bd6](https://github.com/bendigiorgio/harbor-templater/commit/eeb4bd6))
+* Merge branch 'main' of https://github.com/bendigiorgio/harbor-templater ([5b0dcbc](https://github.com/bendigiorgio/harbor-templater/commit/5b0dcbc))
+* chore: add example template and documentation for copy-this-repo functionality ([19ce26e](https://github.com/bendigiorgio/harbor-templater/commit/19ce26e))
+
 ## 1.0.0 (2026-01-18)
 
 * ci: fix pnpm setup and pin node versions ([11d6ffd](https://github.com/bendigiorgio/harbor-templater/commit/11d6ffd))
