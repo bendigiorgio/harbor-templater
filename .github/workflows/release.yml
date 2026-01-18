@@ -13,31 +13,17 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-
-      - uses: actions/setup-node@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
+          cache: "pnpm"
           registry-url: https://registry.npmjs.org
-
-      - name: Enable pnpm
-        run: corepack enable
-
-      - name: Verify pnpm
-        run: pnpm --version
-
-      - name: Environment details
-        run: |
-          echo "Runner: ${RUNNER_OS} ${RUNNER_ARCH}"
-          echo "GitHub Actions: ${GITHUB_ACTIONS}"
-          node --version
-          npm --version
-          pnpm --version
-          corepack --version || true
-          uname -a || true
-          cat /etc/os-release || true
 
       - name: Install
         run: pnpm install --frozen-lockfile
