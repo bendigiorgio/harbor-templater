@@ -1,0 +1,10 @@
+{
+  "name": "Test Template (Base Only)",
+  "version": "0.1.0",
+  "questions": [
+    {"id": "projectDir", "type": "input", "message": "Output directory?", "required": true}
+  ],
+  "steps": [
+    {"type": "copy", "source": "./test/commands/init/fixtures/base.json", "target": "{{answers.projectDir}}/package.json"}
+  ]
+}

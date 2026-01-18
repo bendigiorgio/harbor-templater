@@ -1,0 +1,11 @@
+{
+  "name": "Test Template (Missing Env)",
+  "version": "0.1.0",
+  "questions": [
+    {"id": "projectDir", "type": "input", "message": "Output directory?", "required": true}
+  ],
+  "steps": [
+    {"type": "copy", "source": "./test/commands/init/fixtures/env-missing.txt", "target": "{{answers.projectDir}}/env.txt"},
+    {"type": "environment", "target": "{{answers.projectDir}}/env.txt", "variables": {"MISSING_ENV": "__MISSING_ENV__"}}
+  ]
+}

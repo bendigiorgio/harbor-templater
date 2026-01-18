@@ -1,0 +1,16 @@
+{
+  "name": "Test Template (Shallow Merge)",
+  "version": "0.1.0",
+  "questions": [
+    {"id": "projectDir", "type": "input", "message": "Output directory?", "required": true}
+  ],
+  "steps": [
+    {"type": "copy", "source": "./test/commands/init/fixtures/base.json", "target": "{{answers.projectDir}}/package.json"},
+    {
+      "type": "merge",
+      "source": "./test/commands/init/fixtures/addon.json",
+      "target": "{{answers.projectDir}}/package.json",
+      "merge": {"format": "json", "strategy": "shallow"}
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "Test Template (Text Append)",
+  "version": "0.1.0",
+  "questions": [
+    {"id": "projectDir", "type": "input", "message": "Output directory?", "required": true}
+  ],
+  "steps": [
+    {
+      "type": "merge",
+      "source": "./test/commands/init/fixtures/base.txt",
+      "target": "{{answers.projectDir}}/nested/notes.txt",
+      "merge": {"format": "text", "strategy": "append"}
+    },
+    {
+      "type": "merge",
+      "source": "./test/commands/init/fixtures/addon.txt",
+      "target": "{{answers.projectDir}}/nested/notes.txt",
+      "merge": {"format": "text", "strategy": "append"}
+    }
+  ]
+}

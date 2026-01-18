@@ -1,0 +1,19 @@
+{
+  "name": "Test Template (Copy Exclude)",
+  "version": "0.1.0",
+  "questions": [
+    {"id": "projectDir", "type": "input", "message": "Output directory?", "required": true}
+  ],
+  "steps": [
+    {
+      "type": "copy",
+      "source": "./test/commands/init/fixtures/copy-dir",
+      "target": "{{answers.projectDir}}/copied",
+      "exclude": [
+        "node_modules",
+        "node_modules/**",
+        "**/*.log"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Test Template (Merge Source Dir)",
+  "version": "0.1.0",
+  "questions": [
+    {"id": "projectDir", "type": "input", "message": "Output directory?", "required": true}
+  ],
+  "steps": [
+    {
+      "type": "merge",
+      "source": "./test/commands/init/fixtures/copy-dir",
+      "target": "{{answers.projectDir}}/package.json",
+      "merge": {"format": "json", "strategy": "deep"}
+    }
+  ]
+}
