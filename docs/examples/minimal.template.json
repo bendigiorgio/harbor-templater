@@ -1,0 +1,19 @@
+{
+  "name": "Minimal Template",
+  "version": "0.1.0",
+  "questions": [
+    {
+      "id": "projectDir",
+      "type": "input",
+      "message": "Output directory?",
+      "default": "./my-app"
+    }
+  ],
+  "steps": [
+    {
+      "type": "copy",
+      "source": "https://raw.githubusercontent.com/OWNER/REPO/REF/path/to/file.txt",
+      "target": "{{answers.projectDir}}/file.txt"
+    }
+  ]
+}
