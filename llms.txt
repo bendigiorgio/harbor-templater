@@ -1,0 +1,142 @@
+# harbor-templater
+
+CLI tool for scaffolding projects from a JSON template.
+The main command is `harbor-templater init`.
+
+## Install + run
+
+Install:
+- `npm install -g harbor-templater`
+
+Run (interactive):
+- `harbor-templater init --template ./docs/examples/minimal.template.json --out ./my-app`
+
+Run (non-interactive):
+- `harbor-templater init -t template.json -o . --answer projectDir=./my-app --defaults`
+
+Helpful flags:
+- `--template` (required): path or URL to a template JSON file
+- `--out`: base output directory (relative targets resolve from here)
+- `--answer key=value` (repeatable): pre-fill answers by question id
+- `--defaults`: do not prompt; uses `default` values + `--answer`
+- `--dryRun`: print actions without writing files or running commands
+- `--conflict error|skip|overwrite|prompt`: what to do when a target exists
+- `--allowMissingEnv`: don’t fail if an env var is missing for an environment step
+
+## Making templates
+
+Authoritative spec (WIP):
+- `docs/template-json.md`
+
+Examples:
+- `docs/examples/minimal.template.json`
+- `docs/examples/copy-this-repo.template.json`
+
+### Template shape
+
+A template is JSON with top-level keys:
+- `name` (string)
+- `version` (string; template schema version)
+- `questions` (optional array)
+- `steps` (required array; executed in order)
+
+### Context + interpolation
+
+During a run, answers are stored in `answers` by question id.
+
+Supported interpolation in strings:
+- `{{answers.someId}}`
+- `{{outDir}}` (the resolved output directory)
+
+Interpolation is supported in:
+- `steps[*].target`
+- `steps[*].workingDirectory`
+- `steps[*].command`
+- values in `environment.variables`
+
+### Questions
+
+Each question must have a stable `id`. Supported question types:
+- `input`
+- `confirm`
+- `select`
+- `multiselect`
+
+Questions can be conditional with `when`.
+
+### Conditional execution (`when`)
+
+Both questions and steps can have `when`. Conditions are JSON (no arbitrary code execution).
+
+Common patterns:
+- Equality:
+  `{ "op": "eq", "left": { "ref": "answers.packageManager" }, "right": "pnpm" }`
+- Truthy:
+  `{ "op": "truthy", "value": { "ref": "answers.useReact" } }`
+- Boolean logic:
+  `{ "op": "and", "conditions": [ ... ] }`
+
+Note: `eq`/`neq` uses strict equality. Types must match.
+
+## Steps reference
+
+### `copy`
+
+Copies a source into a target.
+
+`source` formats:
+- Local filesystem path (file or directory)
+- URL (`http://` or `https://`) (downloads a single file)
+- GitHub tarball source:
+  `github:<owner>/<repo>#<ref>:<path>`
+  - `<path>` can be a file or directory inside the repo
+
+`target`:
+- If the resolved source is a directory: it copies into `target` (recursively).
+- If the resolved source is a file:
+  - if `target` ends with `/` or `\`, it is treated as a directory and the source filename is preserved
+  - otherwise it writes to `target` as a file path
+
+`exclude`:
+- Only applies when copying a directory source.
+- Array of glob patterns (matched against paths relative to the copied directory root).
+
+Tip for URL sources: URLs download to a temp file named `download`, so prefer a file `target` like `"./README.md"` instead of a directory target.
+
+### `merge`
+
+Downloads/reads a source file and merges it into the target.
+
+Important notes:
+- The merge `source` must resolve to a file (not a directory).
+- `merge.format: "yaml"` is currently not implemented.
+
+Supported formats/strategies:
+- `format: "json"` (default)
+  - `strategy: "deep"` (default): deep merge objects; arrays concatenate
+  - `strategy: "shallow"`: `{...existing, ...incoming}`
+- `format: "text"`
+  - `strategy: "append"`: existing + incoming
+  - `strategy: "prepend"`: incoming + existing
+  - other strategies replace with incoming
+
+### `environment`
+
+Replaces placeholders in a target file using environment variables.
+
+- `variables` is a map of `ENV_NAME -> placeholderString`.
+- Each `placeholderString` is replaced with the current value of `ENV_NAME`.
+- If an env var is missing, the run fails unless `--allowMissingEnv` is provided.
+
+### `command`
+
+Runs a shell command.
+
+- `command` supports interpolation (e.g. `pnpm -C {{answers.projectDir}} install`).
+- `workingDirectory` is optional; defaults to `outDir`.
+
+## Non-interactive runs (gotchas)
+
+- `--answer` values are treated as strings. If you use `when` conditions that compare booleans/numbers, strict equality may not match.
+- `--defaults` disables prompting; if a required question has no default and wasn’t provided via `--answer`, the run fails.
+- If `--defaults` is set and `--conflict` is left as `prompt`, conflict behavior becomes `error` (no prompting).

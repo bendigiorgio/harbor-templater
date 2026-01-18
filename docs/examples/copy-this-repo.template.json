@@ -1,0 +1,41 @@
+{
+  "name": "Copy This Repo (Test)",
+  "version": "0.1.0",
+  "description": "Smoke-test template that copies files from the harbor-templater repo.",
+  "questions": [
+    {
+      "id": "projectDir",
+      "type": "input",
+      "message": "Output directory?",
+      "default": "./harbor-templater-copy"
+    },
+    {
+      "id": "includeTests",
+      "type": "confirm",
+      "message": "Include the test/ folder?",
+      "default": false
+    }
+  ],
+  "steps": [
+    {
+      "type": "copy",
+      "source": "github:bendigiorgio/harbor-templater#main:.",
+      "target": "{{answers.projectDir}}",
+      "exclude": [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/.github/**",
+        "**/.husky/**",
+        "**/.git/**",
+        "**/pnpm-lock.yaml",
+        "**/tsconfig.tsbuildinfo"
+      ]
+    },
+    {
+      "type": "copy",
+      "source": "github:bendigiorgio/harbor-templater#main:test",
+      "target": "{{answers.projectDir}}/test",
+      "when": { "op": "truthy", "value": { "ref": "answers.includeTests" } }
+    }
+  ]
+}
