@@ -1,3 +1,10 @@
+## 1.2.0 (2026-01-19)
+
+* Merge branch 'develop' ([f2145c3](https://github.com/bendigiorgio/harbor-templater/commit/f2145c3))
+* chore: Biomeフォーマット ([cc4cb2c](https://github.com/bendigiorgio/harbor-templater/commit/cc4cb2c))
+* feat: GitHubリポジトリのダウンロード方法を改善 ([f2f41ca](https://github.com/bendigiorgio/harbor-templater/commit/f2f41ca))
+* feat: pnpm/action-setupを追加 ([3739339](https://github.com/bendigiorgio/harbor-templater/commit/3739339))
+
 ## 1.1.0 (2026-01-18)
 
 * feat: add JSON schema support for templates and enhance documentation ([eeb4bd6](https://github.com/bendigiorgio/harbor-templater/commit/eeb4bd6))
