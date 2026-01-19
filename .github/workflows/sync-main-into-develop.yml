@@ -1,0 +1,35 @@
+name: sync-main-into-develop
+
+on:
+    push:
+        branches: [main]
+
+permissions:
+    contents: write
+
+jobs:
+    sync:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout (full history)
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Set git identity
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            - name: Merge main into develop and push
+              run: |
+                  git fetch origin
+                  git checkout develop
+                  git pull origin develop
+
+                  # Merge main into develop
+                  git merge origin/main --no-ff -m "chore(sync): main -> develop [skip tests]"
+
+                  # Push back to develop
+                  git push origin develop
