@@ -1,3 +1,13 @@
+## 1.3.0 (2026-01-19)
+
+* - レイアウトを調整し、レスポンシブデザインを強化 ([968e50d](https://github.com/bendigiorgio/harbor-templater/commit/968e50d))
+* Merge pull request #1 from bendigiorgio/develop ([af40e3e](https://github.com/bendigiorgio/harbor-templater/commit/af40e3e)), closes [#1](https://github.com/bendigiorgio/harbor-templater/issues/1)
+* chore: llms.txtのサイドバー項目を追加 ([7a8040e](https://github.com/bendigiorgio/harbor-templater/commit/7a8040e))
+* feat: GitHub URLをソースとして解決する機能を追加 ([293312e](https://github.com/bendigiorgio/harbor-templater/commit/293312e))
+* feat: Harbor Templaterの新機能とドキュメントの追加 ([4014223](https://github.com/bendigiorgio/harbor-templater/commit/4014223))
+* feat: mainからdevelopへの同期ワークフローを追加 ([c91f0e0](https://github.com/bendigiorgio/harbor-templater/commit/c91f0e0))
+* feat: テンプレートビルダーを追加 ([3e35924](https://github.com/bendigiorgio/harbor-templater/commit/3e35924))
+
 ## 1.2.0 (2026-01-19)
 
 * Merge branch 'develop' ([f2145c3](https://github.com/bendigiorgio/harbor-templater/commit/f2145c3))
