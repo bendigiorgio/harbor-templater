@@ -4,6 +4,8 @@ import path from "node:path";
 
 import { x as untar } from "tar";
 
+import { runShellCommand } from "./commands.js";
+
 export type ResolvedSource =
   | { kind: "file"; path: string }
   | { kind: "dir"; path: string };
@@ -46,6 +48,46 @@ async function downloadUrlToTempFile(url: string): Promise<ResolvedSource> {
 // If <path> points to a directory, returns kind=dir.
 async function downloadGitHubToTemp(source: string): Promise<ResolvedSource> {
   const parsed = parseGitHubSource(source);
+
+  const transport = (process.env.HARBOR_TEMPLATER_GITHUB_TRANSPORT ?? "auto")
+    .trim()
+    .toLowerCase();
+
+  if (transport !== "auto" && transport !== "tarball" && transport !== "git") {
+    throw new Error(
+      `Invalid HARBOR_TEMPLATER_GITHUB_TRANSPORT: ${process.env.HARBOR_TEMPLATER_GITHUB_TRANSPORT}. Expected auto|tarball|git.`,
+    );
+  }
+
+  if (transport === "tarball") {
+    return await downloadGitHubTarballToTemp(parsed);
+  }
+
+  if (transport === "git") {
+    return await downloadGitHubViaGitToTemp(parsed);
+  }
+
+  // auto
+  try {
+    return await downloadGitHubTarballToTemp(parsed);
+  } catch (error) {
+    // Private repos via codeload typically return 404 (and sometimes 403).
+    // In those cases, fall back to git so the user's local credentials are used.
+    const message = String((error as Error).message ?? error);
+    if (message.includes(" 404 ") || message.includes(" 403 ")) {
+      return await downloadGitHubViaGitToTemp(parsed);
+    }
+    throw error;
+  }
+}
+
+async function downloadGitHubTarballToTemp(parsed: {
+  owner: string;
+  repo: string;
+  ref: string;
+  subpath: string;
+}): Promise<ResolvedSource> {
+  const subpath = normalizeGitHubSubpath(parsed.subpath);
   const tarballUrl = `https://codeload.github.com/${parsed.owner}/${parsed.repo}/tar.gz/${parsed.ref}`;
 
   const response = await fetch(tarballUrl);
@@ -75,12 +117,114 @@ async function downloadGitHubToTemp(source: string): Promise<ResolvedSource> {
   if (!firstEntry) throw new Error("Downloaded GitHub tarball was empty");
 
   const root = path.join(extractDir, firstEntry);
-  const candidate = path.join(root, parsed.subpath);
+  const candidate = path.join(root, subpath);
   const stat = await fs.stat(candidate);
 
   return stat.isDirectory()
     ? { kind: "dir", path: candidate }
     : { kind: "file", path: candidate };
+}
+
+async function downloadGitHubViaGitToTemp(parsed: {
+  owner: string;
+  repo: string;
+  ref: string;
+  subpath: string;
+}): Promise<ResolvedSource> {
+  const subpath = normalizeGitHubSubpath(parsed.subpath);
+
+  const tmpDir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "harbor-templater-gh-git-"),
+  );
+  const repoDir = path.join(tmpDir, "repo");
+  const extractDir = path.join(tmpDir, "extract");
+  await fs.mkdir(repoDir, { recursive: true });
+  await fs.mkdir(extractDir, { recursive: true });
+
+  const httpsUrl = `https://github.com/${parsed.owner}/${parsed.repo}.git`;
+  const sshUrl = `git@github.com:${parsed.owner}/${parsed.repo}.git`;
+  const preferred = (process.env.HARBOR_TEMPLATER_GITHUB_CLONE_PROTOCOL ?? "")
+    .trim()
+    .toLowerCase();
+
+  const urls =
+    preferred === "ssh"
+      ? [sshUrl, httpsUrl]
+      : preferred === "https" || preferred === ""
+        ? [httpsUrl, sshUrl]
+        : (() => {
+            throw new Error(
+              `Invalid HARBOR_TEMPLATER_GITHUB_CLONE_PROTOCOL: ${process.env.HARBOR_TEMPLATER_GITHUB_CLONE_PROTOCOL}. Expected https|ssh.`,
+            );
+          })();
+
+  await runShellCommand("git init", repoDir);
+
+  let lastError: unknown;
+  for (const [idx, url] of urls.entries()) {
+    try {
+      if (idx === 0) {
+        await runShellCommand(
+          `git remote add origin ${escapeShellArg(url)}`,
+          repoDir,
+        );
+      } else {
+        await runShellCommand(
+          `git remote set-url origin ${escapeShellArg(url)}`,
+          repoDir,
+        );
+      }
+
+      // Fetch only what's needed for the requested ref.
+      await runShellCommand(
+        `git fetch --depth 1 origin ${escapeShellArg(parsed.ref)}`,
+        repoDir,
+      );
+
+      const archivePath = path.join(tmpDir, "archive.tar");
+      await runShellCommand(
+        `git archive --format=tar --output=${escapeShellArg(archivePath)} FETCH_HEAD ${escapeShellArg(subpath)}`,
+        repoDir,
+      );
+
+      await untar({ file: archivePath, cwd: extractDir });
+
+      const candidate = path.join(extractDir, subpath);
+      const stat = await fs.stat(candidate);
+      return stat.isDirectory()
+        ? { kind: "dir", path: candidate }
+        : { kind: "file", path: candidate };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw new Error(
+    `Failed to fetch GitHub source via git for ${parsed.owner}/${parsed.repo}#${parsed.ref}:${subpath}. Ensure you have access to the repo and that your git credentials (credential helper / SSH agent) are configured.\n\n${String(
+      (lastError as Error | undefined)?.message ?? lastError,
+    )}`,
+  );
+}
+
+function normalizeGitHubSubpath(input: string): string {
+  const cleaned = input.replaceAll("\\\\", "/").trim();
+  if (cleaned.length === 0)
+    throw new Error("GitHub source path cannot be empty");
+  if (cleaned.includes("\u0000"))
+    throw new Error("GitHub source path contains invalid characters");
+  if (path.posix.isAbsolute(cleaned))
+    throw new Error("GitHub source path must be relative");
+
+  const segments = cleaned.split("/");
+  if (segments.some((s) => s === ".."))
+    throw new Error("GitHub source path must not contain '..'");
+
+  return cleaned;
+}
+
+function escapeShellArg(value: string): string {
+  // Minimal POSIX-style escaping (works on macOS/Linux shells; Windows uses separate .cmd entrypoints).
+  return `'${value.replaceAll("'", "'\\''")}'`;
 }
 
 function parseGitHubSource(input: string): {

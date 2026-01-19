@@ -326,6 +326,14 @@ Examples:
 - `github:acme/templates#main:vite/react`
 - `https://raw.githubusercontent.com/acme/templates/main/vite/react/package.json`
 
+Notes:
+
+- Public GitHub repos are fetched via GitHub tarballs by default.
+- Private GitHub repos require authentication; harbor-templater will fall back to `git` so your local credentials (credential helper / SSH agent) are used.
+- You can control this behavior with:
+  - `HARBOR_TEMPLATER_GITHUB_TRANSPORT=auto|tarball|git`
+  - `HARBOR_TEMPLATER_GITHUB_CLONE_PROTOCOL=https|ssh`
+
 ## Example template (small but complete)
 
 ```json
