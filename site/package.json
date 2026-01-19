@@ -11,10 +11,21 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/react": "^4.4.2",
     "@astrojs/starlight": "^0.37.3",
+    "@rjsf/core": "^6.2.5",
+    "@rjsf/utils": "^6.2.5",
+    "@rjsf/validator-ajv8": "^6.2.5",
+    "ajv": "^8.17.1",
     "astro": "^5.6.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "sharp": "^0.34.2",
     "starlight-changelogs": "^0.4.0",
     "starlight-llms-txt": "^0.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3"
   }
 }

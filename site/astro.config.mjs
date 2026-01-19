@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import react from "@astrojs/react";
 import starlightLlmsTxt from "starlight-llms-txt";
 import starlightChangelogs from "starlight-changelogs";
 
@@ -14,11 +15,17 @@ export default defineConfig({
     },
   },
   integrations: [
+    react(),
     starlight({
       title: "Harbor Templater",
       description: "Documentation for using the Harbor Templater CLI.",
       defaultLocale: "root",
-      plugins: [starlightLlmsTxt(), starlightChangelogs()],
+      plugins: [
+        starlightLlmsTxt({
+          rawContent: true,
+        }),
+        starlightChangelogs(),
+      ],
       locales: {
         root: {
           label: "English",
