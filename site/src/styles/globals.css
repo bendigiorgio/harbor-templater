@@ -1,0 +1,79 @@
+@layer base, starlight, theme, components, utilities;
+
+@import "@astrojs/starlight-tailwind";
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@layer components {
+  /* RJSF (React JSONSchema Form) styling */
+  .rjsf {
+    @apply text-sm;
+  }
+
+  .rjsf fieldset {
+    @apply rounded-lg border border-slate-200 p-3 dark:border-slate-800;
+  }
+
+  .rjsf legend {
+    @apply px-2 text-xs font-semibold text-slate-700 dark:text-slate-300;
+  }
+
+  .rjsf .form-group {
+    @apply mb-3;
+  }
+
+  .rjsf label {
+    @apply block text-sm font-semibold text-slate-900 dark:text-slate-100;
+  }
+
+  .rjsf .field-description {
+    @apply mt-1 text-xs text-slate-600 dark:text-slate-300;
+  }
+
+  .rjsf input[type="text"],
+  .rjsf input[type="number"],
+  .rjsf input[type="email"],
+  .rjsf input[type="url"],
+  .rjsf input[type="password"],
+  .rjsf select,
+  .rjsf textarea {
+    @apply mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition;
+    @apply focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20;
+    @apply dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  .rjsf input[type="checkbox"] {
+    @apply h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500/20 dark:border-slate-700;
+  }
+
+  .rjsf .checkbox label {
+    @apply inline-flex items-center gap-2 font-medium;
+  }
+
+  .rjsf .array-item {
+    @apply rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950;
+  }
+
+  .rjsf .array-item + .array-item {
+    @apply mt-3;
+  }
+
+  .rjsf .btn {
+    @apply inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm;
+    @apply bg-slate-100 text-slate-900 hover:bg-slate-200;
+    @apply dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
+  }
+
+  .rjsf .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500;
+  }
+
+  .rjsf .btn-add {
+    @apply bg-sky-600 text-white hover:bg-sky-500 dark:bg-sky-600 dark:hover:bg-sky-500;
+  }
+
+  .rjsf .error-detail,
+  .rjsf .error {
+    @apply mt-1 text-xs text-red-700 dark:text-red-300;
+  }
+}
