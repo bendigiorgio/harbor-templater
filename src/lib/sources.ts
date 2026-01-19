@@ -12,6 +12,9 @@ export type ResolvedSource =
 
 export async function resolveSource(source: string): Promise<ResolvedSource> {
   if (source.startsWith("http://") || source.startsWith("https://")) {
+    const githubSource = githubUrlToSource(source);
+    if (githubSource) return await downloadGitHubToTemp(githubSource);
+
     return await downloadUrlToTempFile(source);
   }
 
@@ -25,6 +28,50 @@ export async function resolveSource(source: string): Promise<ResolvedSource> {
   return stat.isDirectory()
     ? { kind: "dir", path: localPath }
     : { kind: "file", path: localPath };
+}
+
+export function githubUrlToSource(url: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+
+  // Ignore query/hash for mapping purposes.
+  const host = parsed.hostname.toLowerCase();
+  const pathname = parsed.pathname.replaceAll(/\/+$/g, "");
+  const segments = pathname.split("/").filter(Boolean);
+
+  // https://github.com/<owner>/<repo>/blob/<ref>/<path>
+  // https://github.com/<owner>/<repo>/tree/<ref>/<path>
+  if (host === "github.com") {
+    if (segments.length < 5) return null;
+    const [owner, repoRaw, type, ref, ...rest] = segments;
+    if (!owner || !repoRaw || !type || !ref) return null;
+    if (type !== "blob" && type !== "tree") return null;
+    if (rest.length === 0) return null;
+    const repo = repoRaw.endsWith(".git") ? repoRaw.slice(0, -4) : repoRaw;
+    const subpath = rest.join("/");
+    return `github:${owner}/${repo}#${decodeURIComponent(ref)}:${decodeURIComponent(
+      subpath,
+    )}`;
+  }
+
+  // https://raw.githubusercontent.com/<owner>/<repo>/<ref>/<path>
+  if (host === "raw.githubusercontent.com") {
+    if (segments.length < 4) return null;
+    const [owner, repoRaw, ref, ...rest] = segments;
+    if (!owner || !repoRaw || !ref) return null;
+    if (rest.length === 0) return null;
+    const repo = repoRaw.endsWith(".git") ? repoRaw.slice(0, -4) : repoRaw;
+    const subpath = rest.join("/");
+    return `github:${owner}/${repo}#${decodeURIComponent(ref)}:${decodeURIComponent(
+      subpath,
+    )}`;
+  }
+
+  return null;
 }
 
 async function downloadUrlToTempFile(url: string): Promise<ResolvedSource> {
