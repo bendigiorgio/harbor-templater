@@ -1,10 +1,130 @@
-import React, { useEffect, useMemo, useState, type JSX } from "react";
+import { useEffect, useMemo, useState, type JSX } from "react";
 import Form, { type IChangeEvent } from "@rjsf/core";
-import { type RJSFSchema } from "@rjsf/utils";
+import type {
+  ArrayFieldItemButtonsTemplateProps,
+  ArrayFieldItemTemplateProps,
+  ArrayFieldTemplateProps,
+  RJSFSchema,
+} from "@rjsf/utils";
 import { customizeValidator } from "@rjsf/validator-ajv8";
 import Ajv2020 from "ajv/dist/2020";
 
 const validator = customizeValidator({ AjvClass: Ajv2020 });
+
+function ArrayFieldItemButtonsTemplate(
+  props: ArrayFieldItemButtonsTemplateProps,
+): JSX.Element {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {props.hasMoveUp ? (
+        <button
+          type="button"
+          onClick={props.onMoveUpItem}
+          className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-1 font-semibold text-slate-800 text-xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
+        >
+          Up
+        </button>
+      ) : null}
+
+      {props.hasMoveDown ? (
+        <button
+          type="button"
+          onClick={props.onMoveDownItem}
+          className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-1 font-semibold text-slate-800 text-xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
+        >
+          Down
+        </button>
+      ) : null}
+
+      {props.hasCopy ? (
+        <button
+          type="button"
+          onClick={props.onCopyItem}
+          className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-1 font-semibold text-slate-800 text-xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
+        >
+          Copy
+        </button>
+      ) : null}
+
+      {props.hasRemove ? (
+        <button
+          type="button"
+          onClick={props.onRemoveItem}
+          className="inline-flex items-center rounded-md border border-red-200 bg-red-50 px-2 py-1 font-semibold text-red-800 text-xs hover:bg-red-100 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-200 dark:hover:bg-red-950/50"
+        >
+          Remove
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function ArrayFieldItemTemplate(
+  props: ArrayFieldItemTemplateProps,
+): JSX.Element {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
+      {props.hasToolbar ? (
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="font-semibold text-slate-700 text-xs dark:text-slate-300">
+            Item {props.index + 1}
+          </div>
+          <ArrayFieldItemButtonsTemplate {...props.buttonsProps} />
+        </div>
+      ) : null}
+      <div className="min-w-0">{props.children}</div>
+    </div>
+  );
+}
+
+function ArrayFieldTemplate(props: ArrayFieldTemplateProps): JSX.Element {
+  const title = props.title;
+  const required = props.required;
+  const emptyLabel = title ? `No ${title.toLowerCase()} yet.` : "No items yet.";
+
+  return (
+    <div className="grid gap-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="font-semibold text-slate-900 text-sm dark:text-slate-100">
+            {title}
+            {required ? <span className="ml-1 text-red-600">*</span> : null}
+          </div>
+          {props.schema?.description ? (
+            <div className="mt-1 text-slate-600 text-xs dark:text-slate-300">
+              {props.schema.description}
+            </div>
+          ) : null}
+        </div>
+
+        {props.canAdd ? (
+          <button
+            type="button"
+            onClick={props.onAddClick}
+            className="inline-flex items-center rounded-md bg-sky-600 px-2.5 py-1.5 font-semibold text-white text-xs shadow-sm hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+          >
+            + Add
+          </button>
+        ) : null}
+      </div>
+
+      {props.items.length ? (
+        <div className="grid gap-3">{props.items}</div>
+      ) : (
+        <div className="rounded-lg border border-slate-300 border-dashed bg-white p-3 text-slate-600 text-xs dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+          {emptyLabel} Click <span className="font-semibold">+ Add</span> to
+          create one.
+        </div>
+      )}
+
+      {props.rawErrors?.length ? (
+        <div className="rounded-lg border border-red-300 bg-red-50 p-2 text-red-900 text-xs dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-200">
+          {props.rawErrors.join("\n")}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 type BuilderState = {
   schema: RJSFSchema | null;
@@ -28,7 +148,7 @@ const DEFAULT_TEMPLATE: Record<string, unknown> = {
 };
 
 function safeStringifyJson(value: unknown): string {
-  return JSON.stringify(value, null, 2) + "\n";
+  return `${JSON.stringify(value, null, 2)}\n`;
 }
 
 function tryParseJson(
@@ -159,61 +279,51 @@ export function TemplateBuilder(): JSX.Element {
   };
 
   return (
-    <div style={{ display: "grid", gap: "1rem" }}>
-      <p>
+    <div className="grid gap-4">
+      <p className="text-slate-600 text-sm dark:text-slate-300">
         This is an in-browser editor for Harbor template JSON files. It is
         schema-driven and runs entirely in your browser.
       </p>
 
       {state.schemaError ? (
-        <div
-          style={{
-            border: "1px solid var(--sl-color-red)",
-            padding: "0.75rem",
-            borderRadius: "0.5rem",
-          }}
-        >
-          <strong>Could not load schema</strong>
-          <div
-            style={{
-              marginTop: "0.5rem",
-              fontFamily: "var(--sl-font-mono)",
-              fontSize: "0.875rem",
-            }}
-          >
+        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-red-950 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-200">
+          <div className="font-semibold">Could not load schema</div>
+          <div className="mt-2 whitespace-pre-wrap font-mono text-xs">
             {state.schemaError}
           </div>
-          <div style={{ marginTop: "0.5rem" }}>
-            Expected schema at <code>{SCHEMA_URL}</code>
+          <div className="mt-2 text-xs">
+            Expected schema at <code className="font-mono">{SCHEMA_URL}</code>
           </div>
         </div>
       ) : null}
 
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => downloadJson("template.json", state.formData)}
+          className="mt-4 inline-flex items-center rounded-md bg-sky-600 px-3 py-2 font-semibold text-sm text-white shadow-sm hover:cursor-pointer hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-500/60"
         >
           Download JSON
         </button>
-        <button type="button" onClick={copyOutput}>
+        <button
+          type="button"
+          onClick={copyOutput}
+          className="inline-flex items-center rounded-md bg-slate-900 px-3 py-2 font-semibold text-sm text-white shadow-sm hover:cursor-pointer hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400/70 dark:bg-slate-200 dark:text-slate-900 dark:hover:bg-white"
+        >
           {state.copied ? "Copied" : "Copy JSON"}
         </button>
-        <button type="button" onClick={reset}>
+        <button
+          type="button"
+          onClick={reset}
+          className="inline-flex items-center rounded-md bg-slate-100 px-3 py-2 font-semibold text-slate-900 text-sm hover:cursor-pointer hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400/70 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+        >
           Reset
         </button>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: "1rem",
-          alignItems: "start",
-        }}
-      >
-        <section style={{ minWidth: 0 }}>
-          <h2 style={{ marginTop: 0 }}>Form</h2>
+      <div className="grid gap-4 lg:grid-cols-1 lg:items-start">
+        <section className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+          <h2 className="mt-0 font-semibold text-base">Form</h2>
           {state.schema ? (
             <Form
               schema={state.schema}
@@ -221,18 +331,27 @@ export function TemplateBuilder(): JSX.Element {
               formData={state.formData}
               onChange={onChange}
               liveValidate={false}
+              className="rjsf"
+              templates={{
+                ArrayFieldTemplate,
+                ArrayFieldItemTemplate,
+                ArrayFieldItemButtonsTemplate,
+              }}
             />
           ) : (
-            <p>Loading schema...</p>
+            <div className="flex items-center gap-2 text-slate-600 text-sm dark:text-slate-300">
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-transparent dark:border-slate-700 dark:border-t-transparent" />
+              Loading schema...
+            </div>
           )}
         </section>
 
-        <section style={{ minWidth: 0 }}>
-          <h2 style={{ marginTop: 0 }}>JSON</h2>
+        <section className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+          <h2 className="mt-0 font-semibold text-base">JSON</h2>
 
-          <div style={{ display: "grid", gap: "0.5rem" }}>
-            <label>
-              <div style={{ fontWeight: 600, marginBottom: "0.25rem" }}>
+          <div className="grid gap-2">
+            <label className="grid gap-2">
+              <div className="font-semibold text-slate-900 text-sm dark:text-slate-100">
                 Edit/paste template JSON
               </div>
               <textarea
@@ -246,45 +365,43 @@ export function TemplateBuilder(): JSX.Element {
                   }))
                 }
                 rows={14}
-                style={{
-                  width: "100%",
-                  fontFamily: "var(--sl-font-mono)",
-                  fontSize: "0.875rem",
-                }}
+                className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-slate-900 text-xs leading-5 shadow-inner focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
               />
             </label>
 
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              <button type="button" onClick={applyJsonText}>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={applyJsonText}
+                className="inline-flex items-center rounded-md bg-slate-100 px-3 py-2 font-semibold text-slate-900 text-sm hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400/70 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+              >
                 Apply JSON to form
               </button>
             </div>
 
             {state.inputJsonError ? (
-              <div
-                style={{
-                  color: "var(--sl-color-red)",
-                  fontFamily: "var(--sl-font-mono)",
-                  fontSize: "0.875rem",
-                }}
-              >
+              <div className="whitespace-pre-wrap rounded-lg border border-red-300 bg-red-50 p-2 font-mono text-red-950 text-xs dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-200">
                 {state.inputJsonError}
               </div>
             ) : null}
           </div>
 
-          <details style={{ marginTop: "1rem" }}>
-            <summary>Current JSON (read-only)</summary>
-            <pre style={{ overflowX: "auto" }}>
-              <code>{outputJsonText}</code>
+          <details className="mt-4">
+            <summary className="cursor-pointer font-semibold text-slate-900 text-sm dark:text-slate-100">
+              Current JSON (read-only)
+            </summary>
+            <pre className="mt-2 max-h-96 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 shadow-inner dark:border-slate-800 dark:bg-slate-950">
+              <code className="font-mono text-slate-900 dark:text-slate-100">
+                {outputJsonText}
+              </code>
             </pre>
           </details>
         </section>
       </div>
 
-      <p style={{ color: "var(--sl-color-text-accent)", fontSize: "0.9rem" }}>
+      <p className="text-slate-600 text-sm dark:text-slate-300">
         Note: This builder does not execute templates. Use the CLI with{" "}
-        <code>--dryRun</code> to preview actions.
+        <code className="font-mono">--dryRun</code> to preview actions.
       </p>
     </div>
   );

@@ -5,6 +5,8 @@ import react from "@astrojs/react";
 import starlightLlmsTxt from "starlight-llms-txt";
 import starlightChangelogs from "starlight-changelogs";
 
+import tailwindcss from "@tailwindcss/vite";
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://bendigiorgio.github.io",
@@ -13,6 +15,9 @@ export default defineConfig({
     ssr: {
       noExternal: [/^nanoid(\/.*)?$/],
     },
+
+    // @ts-ignore
+    plugins: [tailwindcss()],
   },
   integrations: [
     react(),
@@ -26,6 +31,7 @@ export default defineConfig({
         }),
         starlightChangelogs(),
       ],
+      customCss: ["/src/styles/globals.css"],
       locales: {
         root: {
           label: "English",
