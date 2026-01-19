@@ -66,6 +66,24 @@ export default defineConfig({
           label: "Changelog",
           link: "changelog/",
         },
+        {
+          label: "llms.txt",
+          collapsed: true,
+          items: [
+            {
+              label: "llms.txt",
+              link: "llms.txt",
+            },
+            {
+              label: "llms-small.txt",
+              link: "llms-small.txt",
+            },
+            {
+              label: "llms-full.txt",
+              link: "llms-full.txt",
+            },
+          ],
+        },
       ],
     }),
   ],
