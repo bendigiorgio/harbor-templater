@@ -1,0 +1,53 @@
+---
+title: Harbor Templater
+description: Harbor Templater CLI の使い方ドキュメント。
+template: splash
+hero:
+  tagline: JSON で定義するプロジェクト雛形生成 CLI。
+  actions:
+    - text: インストール
+      link: guides/installation/
+      icon: right-arrow
+    - text: クイックスタート
+      link: guides/quickstart/
+      icon: right-arrow
+      variant: minimal
+    - text: 例
+      link: examples/
+      icon: right-arrow
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+## できること
+
+`harbor-templater` は JSON テンプレートからプロジェクトを生成します。
+
+- テンプレートは入力をユーザーに質問できます。
+- ステップでコピー、マージ、ファイル内の環境変数設定、コマンド実行ができます。
+
+## まずはここから
+
+<CardGrid stagger>
+  <a href="guides/installation/" style="text-decoration: none;">
+    <Card title="インストール" icon="download">
+      CLI のインストール手順と動作確認。
+    </Card>
+  </a>
+  <a href="guides/quickstart/" style="text-decoration: none;">
+    <Card title="クイックスタート" icon="right-arrow">
+      テンプレートを実行して数分でプロジェクトを生成します。
+    </Card>
+  </a>
+  <a href="reference/template-json/" style="text-decoration: none;">
+    <Card title="テンプレート JSON" icon="open-book">
+      テンプレート形式と利用できるステップ。
+    </Card>
+  </a>
+  <a href="examples/" style="text-decoration: none;">
+    <Card title="例" icon="list-format">
+      実行できるテンプレート例と解説。
+    </Card>
+  </a>
+</CardGrid>

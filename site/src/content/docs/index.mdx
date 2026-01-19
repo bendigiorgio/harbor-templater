@@ -1,0 +1,53 @@
+---
+title: Harbor Templater
+description: Documentation for using the Harbor Templater CLI.
+template: splash
+hero:
+  tagline: A JSON-driven project scaffolding CLI.
+  actions:
+    - text: Install
+      link: guides/installation/
+      icon: right-arrow
+    - text: Quickstart
+      link: guides/quickstart/
+      icon: right-arrow
+      variant: minimal
+    - text: Examples
+      link: examples/
+      icon: right-arrow
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+## What it does
+
+`harbor-templater` scaffolds projects from a JSON template file.
+
+- Templates can prompt you for input.
+- Steps can copy, merge, set environment variables in files, and run commands.
+
+## Start here
+
+<CardGrid stagger>
+  <a href="guides/installation/" style="text-decoration: none;">
+    <Card title="Install" icon="download">
+      How to install the CLI and verify it works.
+    </Card>
+  </a>
+  <a href="guides/quickstart/" style="text-decoration: none;">
+    <Card title="Quickstart" icon="right-arrow">
+      Run a template and generate a project in minutes.
+    </Card>
+  </a>
+  <a href="reference/template-json/" style="text-decoration: none;">
+    <Card title="Template JSON" icon="open-book">
+      Learn the template file format and available steps.
+    </Card>
+  </a>
+  <a href="examples/" style="text-decoration: none;">
+    <Card title="Examples" icon="list-format">
+      Runnable example templates with explanations.
+    </Card>
+  </a>
+</CardGrid>

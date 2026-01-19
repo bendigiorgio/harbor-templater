@@ -7,6 +7,10 @@
 /node_modules
 oclif.manifest.json
 
+/site/node_modules
+/site/dist
+/site/.astro
+
 *.tgz
 tsconfig.tsbuildinfo
 .vscode/

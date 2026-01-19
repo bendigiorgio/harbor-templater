@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "harbor-templater template",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "version", "steps"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional. Path/URL to this schema for editor IntelliSense."
+    },
+    "name": { "type": "string" },
+    "version": { "type": "string" },
+    "description": { "type": "string" },
+    "author": { "type": "string" },
+    "questions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/question" }
+    },
+    "steps": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/step" }
+    }
+  },
+  "$defs": {
+    "valueRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref"],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Ref path in the template context, e.g. answers.projectDir"
+        }
+      }
+    },
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "left", "right"],
+          "properties": {
+            "op": { "enum": ["eq", "neq"] },
+            "left": { "$ref": "#/$defs/valueRef" },
+            "right": {}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "left", "right"],
+          "properties": {
+            "op": { "enum": ["in", "notIn"] },
+            "left": { "$ref": "#/$defs/valueRef" },
+            "right": { "type": "array" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "value"],
+          "properties": {
+            "op": { "enum": ["truthy", "falsy", "exists"] },
+            "value": { "$ref": "#/$defs/valueRef" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "conditions"],
+          "properties": {
+            "op": { "enum": ["and", "or"] },
+            "conditions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/condition" }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "condition"],
+          "properties": {
+            "op": { "const": "not" },
+            "condition": { "$ref": "#/$defs/condition" }
+          }
+        }
+      ]
+    },
+    "questionOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "value"],
+      "properties": {
+        "label": { "type": "string" },
+        "value": { "type": "string" }
+      }
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "message"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "enum": ["input", "confirm", "select", "multiselect"] },
+        "message": { "type": "string" },
+        "default": {
+          "description": "Default answer. Type depends on question type.",
+          "anyOf": [
+            { "type": "string" },
+            { "type": "boolean" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "required": { "type": "boolean" },
+        "options": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/questionOption" }
+        },
+        "when": { "$ref": "#/$defs/condition" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "select" } } },
+          "then": { "required": ["options"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "multiselect" } } },
+          "then": { "required": ["options"] }
+        }
+      ]
+    },
+    "stepBase": {
+      "type": "object",
+      "properties": {
+        "when": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "copyStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "source", "target"],
+      "properties": {
+        "type": { "const": "copy" },
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "exclude": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "when": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "mergeOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": { "enum": ["json", "yaml", "text"] },
+        "strategy": { "enum": ["deep", "shallow", "append", "prepend"] }
+      }
+    },
+    "mergeStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "source", "target"],
+      "properties": {
+        "type": { "const": "merge" },
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "merge": { "$ref": "#/$defs/mergeOptions" },
+        "when": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "environmentStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "target", "variables"],
+      "properties": {
+        "type": { "const": "environment" },
+        "target": { "type": "string" },
+        "variables": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Map of ENV_NAME -> placeholder string"
+        },
+        "when": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "commandStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "command"],
+      "properties": {
+        "type": { "const": "command" },
+        "command": { "type": "string" },
+        "workingDirectory": { "type": "string" },
+        "when": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "step": {
+      "oneOf": [
+        { "$ref": "#/$defs/copyStep" },
+        { "$ref": "#/$defs/mergeStep" },
+        { "$ref": "#/$defs/environmentStep" },
+        { "$ref": "#/$defs/commandStep" }
+      ]
+    }
+  }
+}
