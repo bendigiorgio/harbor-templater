@@ -23,3 +23,8 @@ harbor-templater init --template ./docs/examples/minimal.template.json --out ./m
 
 - [Minimal](./minimal/)
 - [Copy this repo](./copy-this-repo/)
+- [Render + Rename](./render-and-rename/)
+- [Include + Exclude](./include-exclude/)
+- [Move](./move/)
+- [Environment](./environment/)
+- [Merge JSON](./merge-json/)

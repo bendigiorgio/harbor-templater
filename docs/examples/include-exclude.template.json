@@ -1,0 +1,23 @@
+{
+  "$schema": "../template.schema.json",
+  "name": "Include + Exclude",
+  "version": "0.1.0",
+  "description": "Demonstrates copy.include and copy.exclude globs for directory sources.",
+  "questions": [
+    {
+      "id": "projectDir",
+      "type": "input",
+      "message": "Output directory?",
+      "default": "./my-app"
+    }
+  ],
+  "steps": [
+    {
+      "type": "copy",
+      "source": "./docs/examples/fixtures/include-exclude",
+      "target": "{{answers.projectDir}}",
+      "include": ["README.md", "src/**"],
+      "exclude": ["**/*.test.ts", "dist/**"]
+    }
+  ]
+}

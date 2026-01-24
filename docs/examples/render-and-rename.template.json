@@ -1,0 +1,32 @@
+{
+  "$schema": "../template.schema.json",
+  "name": "Render + Rename",
+  "version": "0.1.0",
+  "description": "Demonstrates copy.rename + copy.render (include/exclude) with a local directory source.",
+  "questions": [
+    {
+      "id": "projectDir",
+      "type": "input",
+      "message": "Output directory?",
+      "default": "./my-app"
+    },
+    {
+      "id": "projectName",
+      "type": "input",
+      "message": "Project name?",
+      "default": "demo"
+    }
+  ],
+  "steps": [
+    {
+      "type": "copy",
+      "source": "./docs/examples/fixtures/rich-template",
+      "target": "{{answers.projectDir}}",
+      "rename": { "__PROJECT_NAME__": "{{answers.projectName}}" },
+      "render": {
+        "include": ["**/*"],
+        "exclude": ["**/*.txt"]
+      }
+    }
+  ]
+}
