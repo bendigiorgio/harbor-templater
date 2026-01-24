@@ -1,3 +1,11 @@
+## 1.4.0 (2026-01-24)
+
+* Merge pull request #2 from bendigiorgio/feature/rich-templating ([a368b43](https://github.com/bendigiorgio/harbor-templater/commit/a368b43)), closes [#2](https://github.com/bendigiorgio/harbor-templater/issues/2)
+* Merge pull request #3 from bendigiorgio/develop ([dc9318c](https://github.com/bendigiorgio/harbor-templater/commit/dc9318c)), closes [#3](https://github.com/bendigiorgio/harbor-templater/issues/3)
+* docs: add example templates and documentation for the features: ([df9573a](https://github.com/bendigiorgio/harbor-templater/commit/df9573a))
+* feat: テンプレート機能を強化 ([fa461e1](https://github.com/bendigiorgio/harbor-templater/commit/fa461e1))
+* chore(sync): main -> develop [skip tests] ([1b718c9](https://github.com/bendigiorgio/harbor-templater/commit/1b718c9))
+
 ## 1.3.0 (2026-01-19)
 
 * - レイアウトを調整し、レスポンシブデザインを強化 ([968e50d](https://github.com/bendigiorgio/harbor-templater/commit/968e50d))
