@@ -18,7 +18,12 @@ export type TemplateQuestion = {
   when?: Condition;
 };
 
-export type TemplateStep = CopyStep | MergeStep | EnvironmentStep | CommandStep;
+export type TemplateStep =
+  | CopyStep
+  | MergeStep
+  | EnvironmentStep
+  | CommandStep
+  | MoveStep;
 
 type StepBase = {
   when?: Condition;
@@ -28,7 +33,25 @@ export type CopyStep = StepBase & {
   type: "copy";
   source: string; // remote file/folder reference
   target: string; // local path (may include interpolation)
+  include?: string[]; // glob patterns (applies when source resolves to a directory)
   exclude?: string[]; // glob patterns (applies when source resolves to a directory)
+
+  // Simple string token replacement applied to copied relative paths.
+  // Values support interpolation, e.g. {"__PROJECT_NAME__": "{{answers.projectName}}"}
+  rename?: Record<string, string>;
+
+  // Render file contents using {{...}} interpolation.
+  // This is binary-safe: only files detected as UTF-8 text are rendered.
+  render?: {
+    include: string[];
+    exclude?: string[];
+  };
+};
+
+export type MoveStep = StepBase & {
+  type: "move";
+  from: string;
+  to: string;
 };
 
 export type MergeStep = StepBase & {

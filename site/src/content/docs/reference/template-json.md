@@ -124,7 +124,49 @@ Copies a file or directory from `source` to `target`.
   "type": "copy",
   "source": "github:some-org/some-repo#main:template",
   "target": "{{answers.projectDir}}",
+  "include": ["**/*.md", "**/*.ts"],
   "exclude": ["**/node_modules/**", "**/dist/**"]
+}
+```
+
+Additional options:
+
+- `include` (optional, directory sources only): allowlist glob patterns.
+- `exclude` (optional, directory sources only): denylist glob patterns.
+- `rename` (optional): token replacement map applied to copied relative paths.
+- `render` (optional): opt-in content templating for matching files.
+
+#### Content rendering (`render`)
+
+`render` tells Harbor to treat matching files as text templates and replace `{{ ... }}` placeholders using the template context.
+
+- **Opt-in:** nothing is rendered unless `render` is provided.
+- **Globs:** `render.include` is required. `render.exclude` is optional.
+- **Matching rules:**
+  - For **directory sources**, globs are matched against the file path **relative to the copied directory root** (POSIX-style `/` separators).
+  - For **file sources**, globs are matched against the **basename only** (e.g. `README.md`).
+  - Matching is done against the _source-relative path_ (before `rename` is applied).
+- **What gets replaced:** any `{{ ... }}` substring in the file contents.
+  - `{{answers.someId}}` reads from prompt answers.
+  - `{{outDir}}` expands to the CLI `--out` directory.
+  - Any other expression is treated as a ref path (missing values become an empty string).
+  - There are no loops/conditionals/functions — it’s simple placeholder replacement.
+- **Binary-safe:** Harbor only renders files that look like UTF-8 text.
+  - If the file contains NUL bytes or is not valid UTF-8, it is copied byte-for-byte (placeholders will _not_ be replaced).
+
+Runnable example:
+
+- `docs/examples/render-and-rename.template.json`
+
+Example (rename + render):
+
+```json
+{
+  "type": "copy",
+  "source": "github:some-org/some-repo#main:template",
+  "target": "{{answers.projectDir}}",
+  "rename": { "__PROJECT_NAME__": "{{answers.projectName}}" },
+  "render": { "include": ["**/*.md", "**/*.ts"] }
 }
 ```
 
@@ -168,9 +210,21 @@ Runs a shell command.
 }
 ```
 
+### `move`
+
+Moves/renames a local file or directory.
+
+```json
+{
+  "type": "move",
+  "from": "{{answers.projectDir}}/README.template.md",
+  "to": "{{answers.projectDir}}/README.md"
+}
+```
+
 ## Examples
 
-See the site’s [Examples](../examples/) section for runnable templates and explanations.
+See the site’s [Examples](../../examples/) section for runnable templates and explanations.
 
 Or check out the examples in the repository:
 

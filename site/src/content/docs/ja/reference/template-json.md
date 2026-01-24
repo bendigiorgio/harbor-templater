@@ -124,7 +124,49 @@ description: Harbor のテンプレート JSON 形式リファレンス。
   "type": "copy",
   "source": "github:some-org/some-repo#main:template",
   "target": "{{answers.projectDir}}",
+  "include": ["**/*.md", "**/*.ts"],
   "exclude": ["**/node_modules/**", "**/dist/**"]
+}
+```
+
+追加オプション:
+
+- `include` (任意, ディレクトリソースのみ): コピーするファイルの allowlist グロブ
+- `exclude` (任意, ディレクトリソースのみ): コピーしないファイルの denylist グロブ
+- `rename` (任意): コピーされる相対パスに適用するトークン置換マップ
+- `render` (任意): マッチしたファイル内容を `{{...}}` で差し込み
+
+#### 内容のレンダリング（`render`）
+
+`render` を指定すると、マッチしたファイルを「テキストテンプレート」として扱い、内容中の `{{ ... }}` をテンプレートコンテキストで置換します。
+
+- **明示的に指定したときだけ有効:** `render` が無い場合、内容の置換は行われません。
+- **グロブ:** `render.include` は必須、`render.exclude` は任意です。
+- **マッチングのルール:**
+  - **ディレクトリソース**では、コピー元ルートからの相対パス（`/` 区切り）に対してグロブを評価します。
+  - **ファイルソース**では、ベース名（例: `README.md`）に対してグロブを評価します。
+  - マッチングは _rename 適用前_ の source 相対パスで行われます。
+- **何が置換されるか:** ファイル内容中の `{{ ... }}` です。
+  - `{{answers.someId}}` は回答を参照します。
+  - `{{outDir}}` は CLI の `--out` ディレクトリに展開されます。
+  - それ以外は ref パスとして解釈され、値が無い場合は空文字になります。
+  - ループ/条件分岐/関数などはありません（シンプルなプレースホルダ置換です）。
+- **バイナリ安全:** UTF-8 テキストっぽいファイルだけをレンダリングします。
+  - NUL バイトを含む／UTF-8 としてデコードできない場合は、内容は一切変更せずバイト列のままコピーします。
+
+実行できる例:
+
+- `docs/examples/render-and-rename.template.json`
+
+例（rename + render）:
+
+```json
+{
+  "type": "copy",
+  "source": "github:some-org/some-repo#main:template",
+  "target": "{{answers.projectDir}}",
+  "rename": { "__PROJECT_NAME__": "{{answers.projectName}}" },
+  "render": { "include": ["**/*.md", "**/*.ts"] }
 }
 ```
 
@@ -168,9 +210,21 @@ description: Harbor のテンプレート JSON 形式リファレンス。
 }
 ```
 
+### `move`
+
+ローカルのファイル/ディレクトリを移動（リネーム）します。
+
+```json
+{
+  "type": "move",
+  "from": "{{answers.projectDir}}/README.template.md",
+  "to": "{{answers.projectDir}}/README.md"
+}
+```
+
 ## 例
 
-実行できるテンプレート例と解説は [例](../examples/) を参照してください。
+実行できるテンプレート例と解説は [例](../../examples/) を参照してください。
 
 リポジトリ内のサンプル:
 

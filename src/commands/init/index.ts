@@ -4,13 +4,13 @@ import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { Command, Flags } from "@oclif/core";
 import picomatch from "picomatch";
 import { runShellCommand } from "../../lib/commands.js";
-import { applyEnvironmentReplacements } from "../../lib/environment.js";
 import {
-  copyPath,
-  ensureDir,
-  looksLikeDirTarget,
-  pathExists,
-} from "../../lib/fs-ops.js";
+  applyRenameToBasename,
+  copyDirWithTransforms,
+  copyFileMaybeRender,
+} from "../../lib/copy-transform.js";
+import { applyEnvironmentReplacements } from "../../lib/environment.js";
+import { ensureDir, looksLikeDirTarget, pathExists } from "../../lib/fs-ops.js";
 import { mergeIntoTarget } from "../../lib/merge.js";
 import { resolveSource } from "../../lib/sources.js";
 import {
@@ -234,59 +234,113 @@ async function executeSteps(args: {
         const policy = effectiveConflictPolicy(args);
 
         if (src.kind === "dir") {
-          const shouldProceed = await handleDirConflict({
+          const decision = await handleDirConflict({
             policy,
-            source: step.source,
             target,
             defaults: args.defaults,
           });
 
-          if (!shouldProceed) {
+          if (!decision.proceed) {
             args.log(`skip copy ${step.source} -> ${target} (exists)`);
             break;
           }
 
-          const excludeMatcher = step.exclude?.length
-            ? picomatch(step.exclude, { dot: true })
-            : null;
+          const force =
+            policy === "overwrite" || args.force || Boolean(decision.overwrite);
 
-          await fs.cp(src.path, target, {
-            recursive: true,
-            force: policy === "overwrite" || args.force,
-            filter: excludeMatcher
-              ? (srcEntry) => {
-                  const rel = path
-                    .relative(src.path, srcEntry)
-                    .replaceAll("\\", "/");
-                  // keep root
-                  if (!rel) return true;
-                  return !excludeMatcher(rel);
-                }
-              : undefined,
+          await copyDirWithTransforms(src.path, target, {
+            ctx: args.ctx,
+            force,
+            include: step.include,
+            exclude: step.exclude,
+            rename: step.rename,
+            render: step.render,
           });
         } else {
           // If target ends with '/', treat it as directory and keep filename
           const finalTarget = looksLikeDirTarget(step.target)
-            ? path.join(target, path.basename(src.path))
+            ? path.join(
+                target,
+                applyRenameToBasename(
+                  path.basename(src.path),
+                  step.rename,
+                  args.ctx,
+                ),
+              )
             : target;
 
-          const shouldProceed = await handleFileConflict({
+          const decision = await handleFileConflict({
             policy,
-            source: step.source,
             target: finalTarget,
             defaults: args.defaults,
           });
 
-          if (!shouldProceed) {
+          if (!decision.proceed) {
             args.log(`skip copy ${step.source} -> ${finalTarget} (exists)`);
             break;
           }
 
-          await copyPath(src.path, finalTarget, {
-            force: policy === "overwrite" || args.force,
+          const force =
+            policy === "overwrite" || args.force || Boolean(decision.overwrite);
+
+          const shouldRender = Boolean(
+            step.render &&
+            (() => {
+              const rel = path.basename(src.path).replaceAll("\\", "/");
+              const include = picomatch(step.render.include, { dot: true });
+              const exclude = step.render.exclude?.length
+                ? picomatch(step.render.exclude, { dot: true })
+                : null;
+              return include(rel) && !exclude?.(rel);
+            })(),
+          );
+          await copyFileMaybeRender(src.path, finalTarget, {
+            ctx: args.ctx,
+            force,
+            render: shouldRender,
           });
         }
 
+        break;
+      }
+
+      case "move": {
+        const from = resolveTargetPath(
+          args.ctx.outDir,
+          interpolate(step.from, args.ctx),
+        );
+        const to = resolveTargetPath(
+          args.ctx.outDir,
+          interpolate(step.to, args.ctx),
+        );
+
+        if (args.dryRun) {
+          args.log(`move ${from} -> ${to}`);
+          break;
+        }
+
+        if (!(await pathExists(from))) {
+          throw new Error(`Move source does not exist: ${from}`);
+        }
+
+        const policy = effectiveConflictPolicy(args);
+        const decision = await handleFileConflict({
+          policy,
+          target: to,
+          defaults: args.defaults,
+        });
+
+        if (!decision.proceed) {
+          args.log(`skip move ${from} -> ${to} (exists)`);
+          break;
+        }
+
+        if (decision.overwrite && (await pathExists(to))) {
+          await fs.rm(to, { recursive: true, force: true });
+        }
+
+        await ensureDir(path.dirname(to));
+        await movePath(from, to);
         break;
       }
 
@@ -347,6 +401,27 @@ async function executeSteps(args: {
   }
 }
 
+async function movePath(from: string, to: string): Promise<void> {
+  try {
+    await fs.rename(from, to);
+    return;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException | undefined)?.code;
+    if (code !== "EXDEV") throw error;
+  }
+
+  // Cross-device fallback.
+  const stat = await fs.stat(from);
+  if (stat.isDirectory()) {
+    await fs.cp(from, to, { recursive: true, force: true });
+    await fs.rm(from, { recursive: true, force: true });
+    return;
+  }
+
+  await fs.copyFile(from, to);
+  await fs.rm(from, { force: true });
+}
+
 function effectiveConflictPolicy(args: {
   conflict: ConflictPolicy;
   defaults: boolean;
@@ -358,48 +433,50 @@ function effectiveConflictPolicy(args: {
 
 async function handleFileConflict(args: {
   policy: ConflictPolicy;
-  source: string;
   target: string;
   defaults: boolean;
-}): Promise<boolean> {
+}): Promise<{ proceed: boolean; overwrite: boolean }> {
   const exists = await pathExists(args.target);
-  if (!exists) return true;
+  if (!exists) return { proceed: true, overwrite: false };
 
   switch (args.policy) {
     case "overwrite":
-      return true;
+      return { proceed: true, overwrite: true };
     case "skip":
-      return false;
+      return { proceed: false, overwrite: false };
     case "error":
       throw new Error(`Target exists: ${args.target}`);
     case "prompt":
-      return await confirm({
+      return (await confirm({
         message: `Overwrite ${args.target}?`,
         default: false,
-      });
+      }))
+        ? { proceed: true, overwrite: true }
+        : { proceed: false, overwrite: false };
   }
 }
 
 async function handleDirConflict(args: {
   policy: ConflictPolicy;
-  source: string;
   target: string;
   defaults: boolean;
-}): Promise<boolean> {
+}): Promise<{ proceed: boolean; overwrite: boolean }> {
   const exists = await pathExists(args.target);
-  if (!exists) return true;
+  if (!exists) return { proceed: true, overwrite: false };
 
   switch (args.policy) {
     case "overwrite":
-      return true;
+      return { proceed: true, overwrite: true };
     case "skip":
-      return false;
+      return { proceed: false, overwrite: false };
     case "error":
       throw new Error(`Target exists: ${args.target}`);
     case "prompt":
-      return await confirm({
+      return (await confirm({
         message: `Directory exists. Merge/overwrite into ${args.target}?`,
         default: false,
-      });
+      }))
+        ? { proceed: true, overwrite: true }
+        : { proceed: false, overwrite: false };
   }
 }

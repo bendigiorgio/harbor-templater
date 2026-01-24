@@ -1,0 +1,29 @@
+{
+  "$schema": "../template.schema.json",
+  "name": "Environment",
+  "version": "0.1.0",
+  "description": "Demonstrates the environment step by replacing placeholders with env var values.",
+  "questions": [
+    {
+      "id": "projectDir",
+      "type": "input",
+      "message": "Output directory?",
+      "default": "./my-app"
+    }
+  ],
+  "steps": [
+    {
+      "type": "copy",
+      "source": "./docs/examples/fixtures/environment/.env",
+      "target": "{{answers.projectDir}}/.env"
+    },
+    {
+      "type": "environment",
+      "target": "{{answers.projectDir}}/.env",
+      "variables": {
+        "DATABASE_URL": "${DATABASE_URL}",
+        "API_KEY": "${API_KEY}"
+      }
+    }
+  ]
+}

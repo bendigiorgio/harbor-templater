@@ -195,7 +195,19 @@ type CopyStep = StepBase & {
   type: "copy";
   source: string;
   target: string;
+  include?: string[];
   exclude?: string[];
+
+  // Optional token replacement applied to copied relative paths.
+  // Values support interpolation, e.g. {"__PROJECT_NAME__": "{{answers.projectName}}"}
+  rename?: Record<string, string>;
+
+  // Optional content rendering (opt-in by glob patterns).
+  // Rendering is binary-safe: only files detected as UTF-8 text are rendered.
+  render?: {
+    include: string[];
+    exclude?: string[];
+  };
 };
 
 type MergeStep = StepBase & {
@@ -220,7 +232,18 @@ type CommandStep = StepBase & {
   workingDirectory?: string;
 };
 
-type TemplateStep = CopyStep | MergeStep | EnvironmentStep | CommandStep;
+type MoveStep = StepBase & {
+  type: "move";
+  from: string;
+  to: string;
+};
+
+type TemplateStep =
+  | CopyStep
+  | MoveStep
+  | MergeStep
+  | EnvironmentStep
+  | CommandStep;
 ```
 
 ### `copy`
@@ -237,14 +260,46 @@ Optional `exclude` (directory sources only):
 
 Example:
 
-```json
+````json
 {
   "type": "copy",
   "source": "github:acme/templates#main:base",
   "target": "{{answers.projectDir}}",
   "exclude": ["**/node_modules/**", "**/dist/**"]
 }
-```
+
+Optional `include` (directory sources only):
+
+- If provided, only files whose relative paths match `include` globs are copied.
+- `exclude` is applied after `include`.
+
+Optional `rename`:
+
+- A map of `token -> replacement` applied to copied relative paths.
+- Useful for placeholders like `__PROJECT_NAME__` in filenames and folder names.
+- Replacement values support interpolation.
+
+Optional `render`:
+
+- Opt-in content templating for matching files.
+- `render.include` is required and is evaluated against paths relative to the copied directory root.
+- `render.exclude` can be used to opt out of rendering specific files.
+- Binary-safe: only UTF-8 text files are rendered; others are copied as bytes.
+
+Example (rename + render):
+
+```json
+{
+  "type": "copy",
+  "source": "github:acme/templates#main:base",
+  "target": "{{answers.projectDir}}",
+  "rename": { "__PROJECT_NAME__": "{{answers.projectName}}" },
+  "render": { "include": ["**/*.md", "**/*.ts", "**/*.json"] },
+  "exclude": ["**/node_modules/**", "**/dist/**"]
+}
+````
+
+````
 
 ### `merge`
 
@@ -282,11 +337,29 @@ Example (`.npmrc`):
     "NPM_TOKEN": "__NPM_TOKEN__"
   }
 }
-```
+````
 
 If `NPM_TOKEN=abc`, then `__NPM_TOKEN__` becomes `abc`.
 
 ### `command`
+
+### `move`
+
+Moves/renames a local path.
+
+- `from` is the existing local path.
+- `to` is the destination local path.
+- Both support interpolation.
+
+Example:
+
+```json
+{
+  "type": "move",
+  "from": "{{answers.projectDir}}/README.template.md",
+  "to": "{{answers.projectDir}}/README.md"
+}
+```
 
 Runs a shell command.
 
