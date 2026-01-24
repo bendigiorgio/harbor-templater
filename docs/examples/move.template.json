@@ -1,0 +1,26 @@
+{
+  "$schema": "../template.schema.json",
+  "name": "Move",
+  "version": "0.1.0",
+  "description": "Demonstrates moving/renaming a file after copying.",
+  "questions": [
+    {
+      "id": "projectDir",
+      "type": "input",
+      "message": "Output directory?",
+      "default": "./my-app"
+    }
+  ],
+  "steps": [
+    {
+      "type": "copy",
+      "source": "./docs/examples/fixtures/move/README.template.md",
+      "target": "{{answers.projectDir}}/README.template.md"
+    },
+    {
+      "type": "move",
+      "from": "{{answers.projectDir}}/README.template.md",
+      "to": "{{answers.projectDir}}/README.md"
+    }
+  ]
+}

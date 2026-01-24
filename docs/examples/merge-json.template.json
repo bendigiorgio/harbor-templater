@@ -1,0 +1,27 @@
+{
+  "$schema": "../template.schema.json",
+  "name": "Merge JSON",
+  "version": "0.1.0",
+  "description": "Demonstrates merge step (json + deep strategy) by merging into package.json.",
+  "questions": [
+    {
+      "id": "projectDir",
+      "type": "input",
+      "message": "Output directory?",
+      "default": "./my-app"
+    }
+  ],
+  "steps": [
+    {
+      "type": "copy",
+      "source": "./docs/examples/fixtures/merge/base.package.json",
+      "target": "{{answers.projectDir}}/package.json"
+    },
+    {
+      "type": "merge",
+      "source": "./docs/examples/fixtures/merge/addon.package.json",
+      "target": "{{answers.projectDir}}/package.json",
+      "merge": { "format": "json", "strategy": "deep" }
+    }
+  ]
+}
