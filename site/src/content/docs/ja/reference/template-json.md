@@ -124,7 +124,27 @@ description: Harbor のテンプレート JSON 形式リファレンス。
   "type": "copy",
   "source": "github:some-org/some-repo#main:template",
   "target": "{{answers.projectDir}}",
+  "include": ["**/*.md", "**/*.ts"],
   "exclude": ["**/node_modules/**", "**/dist/**"]
+}
+```
+
+追加オプション:
+
+- `include` (任意, ディレクトリソースのみ): コピーするファイルの allowlist グロブ
+- `exclude` (任意, ディレクトリソースのみ): コピーしないファイルの denylist グロブ
+- `rename` (任意): コピーされる相対パスに適用するトークン置換マップ
+- `render` (任意): マッチしたファイル内容を `{{...}}` で差し込み（UTF-8 テキストのみ。バイナリはそのままコピー）
+
+例（rename + render）:
+
+```json
+{
+  "type": "copy",
+  "source": "github:some-org/some-repo#main:template",
+  "target": "{{answers.projectDir}}",
+  "rename": { "__PROJECT_NAME__": "{{answers.projectName}}" },
+  "render": { "include": ["**/*.md", "**/*.ts"] }
 }
 ```
 
@@ -165,6 +185,18 @@ description: Harbor のテンプレート JSON 形式リファレンス。
   "type": "command",
   "command": "pnpm install",
   "workingDirectory": "{{answers.projectDir}}"
+}
+```
+
+### `move`
+
+ローカルのファイル/ディレクトリを移動（リネーム）します。
+
+```json
+{
+  "type": "move",
+  "from": "{{answers.projectDir}}/README.template.md",
+  "to": "{{answers.projectDir}}/README.md"
 }
 ```
 

@@ -145,10 +145,44 @@
         "type": { "const": "copy" },
         "source": { "type": "string" },
         "target": { "type": "string" },
+        "include": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional allowlist glob patterns (directory sources only)."
+        },
         "exclude": {
           "type": "array",
           "items": { "type": "string" }
         },
+        "rename": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Optional token replacement map applied to copied relative paths. Values support interpolation."
+        },
+        "render": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["include"],
+          "properties": {
+            "include": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Opt-in glob patterns for content rendering."
+            },
+            "exclude": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "when": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "moveStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "to"],
+      "properties": {
+        "type": { "const": "move" },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
         "when": { "$ref": "#/$defs/condition" }
       }
     },
@@ -201,6 +235,7 @@
     "step": {
       "oneOf": [
         { "$ref": "#/$defs/copyStep" },
+        { "$ref": "#/$defs/moveStep" },
         { "$ref": "#/$defs/mergeStep" },
         { "$ref": "#/$defs/environmentStep" },
         { "$ref": "#/$defs/commandStep" }

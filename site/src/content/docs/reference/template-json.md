@@ -124,7 +124,27 @@ Copies a file or directory from `source` to `target`.
   "type": "copy",
   "source": "github:some-org/some-repo#main:template",
   "target": "{{answers.projectDir}}",
+  "include": ["**/*.md", "**/*.ts"],
   "exclude": ["**/node_modules/**", "**/dist/**"]
+}
+```
+
+Additional options:
+
+- `include` (optional, directory sources only): allowlist glob patterns.
+- `exclude` (optional, directory sources only): denylist glob patterns.
+- `rename` (optional): token replacement map applied to copied relative paths.
+- `render` (optional): opt-in content templating for matching files (UTF-8 text only; binary-safe).
+
+Example (rename + render):
+
+```json
+{
+  "type": "copy",
+  "source": "github:some-org/some-repo#main:template",
+  "target": "{{answers.projectDir}}",
+  "rename": { "__PROJECT_NAME__": "{{answers.projectName}}" },
+  "render": { "include": ["**/*.md", "**/*.ts"] }
 }
 ```
 
@@ -165,6 +185,18 @@ Runs a shell command.
   "type": "command",
   "command": "pnpm install",
   "workingDirectory": "{{answers.projectDir}}"
+}
+```
+
+### `move`
+
+Moves/renames a local file or directory.
+
+```json
+{
+  "type": "move",
+  "from": "{{answers.projectDir}}/README.template.md",
+  "to": "{{answers.projectDir}}/README.md"
 }
 ```
 
