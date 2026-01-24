@@ -27,7 +27,7 @@ $ npm install -g harbor-templater
 $ harbor-templater COMMAND
 running command...
 $ harbor-templater (--version)
-harbor-templater/1.2.0 linux-x64 node-v24.12.0
+harbor-templater/1.3.0 linux-x64 node-v24.12.0
 $ harbor-templater --help [COMMAND]
 USAGE
   $ harbor-templater COMMAND
@@ -100,7 +100,7 @@ EXAMPLES
   $ harbor-templater init -t template.json -o . --answer projectDir=./my-app --defaults
 ```
 
-_See code: [src/commands/init/index.ts](https://github.com/bendigiorgio/harbor-templater/blob/v1.2.0/src/commands/init/index.ts)_
+_See code: [src/commands/init/index.ts](https://github.com/bendigiorgio/harbor-templater/blob/v1.3.0/src/commands/init/index.ts)_
 
 ## `harbor-templater plugins`
 
